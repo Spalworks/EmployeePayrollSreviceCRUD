@@ -15,8 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bridgelabz.employeepayrollapp.dto.EmployeeDTO;
+import com.bridgelabz.employeepayrollapp.dto.ResponseDTO;
 import com.bridgelabz.employeepayrollapp.entity.Employee;
 import com.bridgelabz.employeepayrollapp.service.EmpService;
+import com.bridgelabz.employeepayrollapp.service.IEmpService;
+
+import jakarta.validation.Valid;
 
 
 @RestController
@@ -24,12 +28,13 @@ import com.bridgelabz.employeepayrollapp.service.EmpService;
 public class EmpController {
 
 	@Autowired
-	EmpService service;
+	IEmpService service;
 	
 	@GetMapping("/")
-	public ResponseEntity<List<Employee>> getAllEmp() {
+	public ResponseEntity<ResponseDTO> getAllEmp() {
 		
 		List<Employee> result = service.getAllEmployee();
+		ResponseDTO responseDTO = new ResponseDTO(result, "Data retrived Successfully");
 		if(result.size() != 0) {
 			return new ResponseEntity(result, HttpStatus.OK);
 		} 
@@ -37,29 +42,34 @@ public class EmpController {
 	}
 	
 	@GetMapping("/get/{id}")
-	public ResponseEntity<Employee> getUEmp(@PathVariable int id) {
+	public ResponseEntity<ResponseDTO> getUEmp(@PathVariable int id) {
 
 		Employee result = service.getEmployee(id);
 		if(result != null) {
-			return new ResponseEntity<Employee>(result, HttpStatus.OK);
+			ResponseDTO responseDTO = new ResponseDTO(result, "Data retrived Successfully");
+			return new ResponseEntity<ResponseDTO>(responseDTO, HttpStatus.OK);
 		} 
 			return new ResponseEntity(null,HttpStatus.NOT_FOUND);
 	}
 
 	@PostMapping("/create")
-	public Employee addEmp(@RequestBody EmployeeDTO employee) {
+	public ResponseEntity<ResponseDTO> addEmp(@Valid @RequestBody EmployeeDTO employee) {
 		Employee response = service.createUser(employee);
-		return response;
+		ResponseDTO responseDTO = new ResponseDTO(response, "Data saved successfully");
+		return new ResponseEntity<ResponseDTO>(responseDTO, HttpStatus.OK);
 	}
 	
 	@PutMapping("/update/{id}")
-	public Employee updateEmp(@PathVariable int id, @RequestBody EmployeeDTO employee) {
+	public ResponseEntity<ResponseDTO> updateEmp(@PathVariable int id, @Valid @RequestBody EmployeeDTO employee) {
 		Employee response = service.updateEmployee(id, employee);
-		return response;
+		ResponseDTO responseDTO = new ResponseDTO(response, "Data updated successfully");
+		return new ResponseEntity<ResponseDTO>(responseDTO, HttpStatus.OK);
 	}
 	
 	@DeleteMapping("/delete/{id}")
-	public String delete(@PathVariable int id) {
-		return service.deleteUserById(id);
+	public ResponseEntity<ResponseDTO> delete(@PathVariable int id) {
+		service.deleteUserById(id);
+		ResponseDTO responseDTO = new ResponseDTO(null, "Data deleted successfully");
+		return new ResponseEntity<ResponseDTO>(responseDTO, HttpStatus.OK);
 	}
 }
